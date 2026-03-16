@@ -1,19 +1,27 @@
+**Информация о документе**
+
+**Описание**: Небольшой наборчик костыльных хелперов для CMake.
+
+**URL**: https://github.com/al-martyn1/umba-md-pp/blob/main/.umba.cmake/README.md
+
+---
+
 # UMBA CMake (umba.cmake)
 
 Небольшой наборчик костыльных хелперов для CMake.
 
-  - [Быстрый старт](#user-content-быстрый-старт)
-  - [Конфигурационные переменные](#user-content-конфигурационные-переменные)
-  - [Функции](#user-content-функции)
-    - [Функция umba_add_target_options](#user-content-функция-umba_add_target_options)
-    - [Функция umba_make_sources_tree](#user-content-функция-umba_make_sources_tree)
-    - [Функция umba_configure_boost](#user-content-функция-umba_configure_boost)
-  - [Замечания по использованию внешних библиотек](#user-content-замечания-по-использованию-внешних-библиотек)
-    - [Boost](#user-content-boost)
-      - [Boost в режиме header-only](#user-content-boost-в-режиме-header-only)
-      - [Настройка системы для использования Boost в режиме header-only](#user-content-настройка-системы-для-использования-boost-в-режиме-header-only)
-      - [Использование Boost в режиме FetchContent](#user-content-использование-boost-в-режиме-fetchcontent)
-  - [Справка по использованию подмодулей](#user-content-справка-по-использованию-подмодулей)
+- [Быстрый старт](#быстрый-старт)
+- [Конфигурационные переменные](#конфигурационные-переменные)
+- [Функции](#функции)
+  - [Функция umba_add_target_options](#функция-umba_add_target_options)
+  - [Функция umba_make_sources_tree](#функция-umba_make_sources_tree)
+  - [Функция umba_configure_boost](#функция-umba_configure_boost)
+- [Замечания по использованию внешних библиотек](#замечания-по-использованию-внешних-библиотек)
+  - [Boost](#boost)
+    - [Boost в режиме header-only](#boost-в-режиме-header-only)
+    - [Настройка системы для использования Boost в режиме header-only](#настройка-системы-для-использования-boost-в-режиме-header-only)
+    - [Использование Boost в режиме FetchContent](#использование-boost-в-режиме-fetchcontent)
+- [Справка по использованию подмодулей](#справка-по-использованию-подмодулей)
 
 
 # Быстрый старт
@@ -33,7 +41,6 @@ wget https://raw.githubusercontent.com/al-martyn1/.cmake/main/umba.cmake
 Конфигурационные переменные следует задавать до подключения данного (`umba.cmake`) файла.
 
  - `UMBA_STATIC_RUNTIME` - использовать статический рантайм при сборке приложения.
-
 
 
 # Функции
@@ -86,8 +93,6 @@ function(umba_configure_boost BOOST_OPTIONS...)
  - `MULTITHREADED` - использовать многопоточную версию библиотеки;
  - `SINGLETHREADED` - использовать одноопоточную версию библиотеки;
  - `STATIC_RUNTIME` - использовать статически линкуемый C/C++ рантайм.
-
-
 
 
 # Замечания по использованию внешних библиотек
@@ -176,8 +181,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/.cmake/umba.cmake)
 ```
 
 
-
-
 # Справка по использованию подмодулей
 
 Pro Git : [Инструменты Git - Подмодули](https://git-scm.com/book/ru/v2/%D0%98%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-Git-%D0%9F%D0%BE%D0%B4%D0%BC%D0%BE%D0%B4%D1%83%D0%BB%D0%B8)
@@ -212,6 +215,5 @@ git submodule update --recursive --remote
 # или
 git submodule update --init --recursive --remote --merge
 ```
-
 
 
