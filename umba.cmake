@@ -664,15 +664,15 @@ endfunction()
 function(umba_make_sources_tree SRC_ROOT SRCS HDRS RCSRCS)
 
     if(SRCS)
-        source_group(TREE ${SRC_ROOT} PREFIX "Sources" FILES ${SRCS})
+        source_group(TREE ${SRC_ROOT} PREFIX "Source Files" FILES ${SRCS})
     endif()
 
     if(HDRS)
-        source_group(TREE ${SRC_ROOT} PREFIX "Headers" FILES ${HDRS})
+        source_group(TREE ${SRC_ROOT} PREFIX "Header Files" FILES ${HDRS})
     endif()
 
     if(RCSRCS)
-        source_group(TREE ${SRC_ROOT} PREFIX "Resources" FILES ${RCSRCS})
+        source_group(TREE ${SRC_ROOT} PREFIX "Resource Files" FILES ${RCSRCS})
     endif()
 
 endfunction()
