@@ -1,3 +1,8 @@
+# author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+# copyright (c) 2024-2026 Alexander Martynov
+# brief Детект системы и архитектуры
+# ----------------------------------------------------------------
+
 cmake_minimum_required(VERSION 3.25)
 
 include_guard(GLOBAL)

@@ -1,3 +1,8 @@
+# author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+# copyright (c) 2024-2026 Alexander Martynov
+# brief Попытка подменить windres в MinGW
+# ----------------------------------------------------------------
+
 include_guard(GLOBAL)
 
 function(umba_fix_windres)

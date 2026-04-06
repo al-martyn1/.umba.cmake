@@ -1,3 +1,8 @@
+@rem author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+@rem copyright (c) 2024-2026 Alexander Martynov
+@rem brief 
+@rem ----------------------------------------------------------------
+
 @echo off
 @rem powershell "((Get-Content -path \"%1\" -Raw) -replace 'namespace public {','namespace public_ {') | Set-Content -Path \"%1\""
 @rem powershell "((Get-Content -path \"%1\" -Raw) -replace '::public::','::public_::')                 | Set-Content -Path \"%1\""

@@ -1,3 +1,8 @@
+@rem author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
+@rem copyright (c) 2024-2026 Alexander Martynov
+@rem brief 
+@rem ----------------------------------------------------------------
+
 dir "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
 dir "C:\Program Files\Microsoft Visual Studio\Installer\vswhere.exe"
 
