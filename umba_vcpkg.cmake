@@ -327,6 +327,13 @@ function(umba_vcpkg_find_target_triplet FOUND_TRIPLET FOUND_FULL_FILENAME )
 
     list(APPEND STATIC_DYNAMIC_LIST "-") # Добавляем пустой элемент, чтобы список никогда не был пустым
 
+    if (UMBA_CMAKE_VERBOSE AND UMBA_CMAKE_TRACE AND UMBA_CMAKE_TRACE_VCPKG)
+        message(STATUS "UMBA: STATIC_DYNAMIC_LIST:") # NOTICE
+        foreach(STATIC_DYNAMIC_ITEM ${STATIC_DYNAMIC_LIST})
+            message(STATUS "  ${STATIC_DYNAMIC_ITEM}") # NOTICE
+        endforeach()
+    endif()
+
 
     #---------------------------
     # Создаём список суффиксов, которые задают тип C/C++ рантайма
