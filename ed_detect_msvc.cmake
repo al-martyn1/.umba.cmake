@@ -33,6 +33,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/ed_common.cmake")
   CMAKE_GENERATOR  - определена, "Visual Studio..."/"Ninja"/etc
   CMAKE_GENERATOR_PLATFORM - определена для "Visual Studio", для Ninja - не определена
   CMAKE_C_COMPILER: D:/Qt/Tools/mingw810_64/bin/gcc.exe - определена для Ninja/VSCode, для Visual Studio не определена
+  CMAKE_CXX_COMPILER_ID - не определена для "Visual Studio", для других - пока не понятно
 
 Если собирать не MSVS/msbuild, а, например, Ninja:
   > cd cmake

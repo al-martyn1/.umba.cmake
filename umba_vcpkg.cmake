@@ -9,6 +9,10 @@ include("${CMAKE_CURRENT_LIST_DIR}/functions_base.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/pathlib.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/strlib.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/umba_system_arch.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/umba_runtime_opt_check.cmake")
+
+#----------------------------------------------------------------------------
+
 
 
 #----------------------------------------------------------------------------
@@ -271,13 +275,6 @@ To try and link everything possible statically
 
 
 #----------------------------------------------------------------------------
-include("${CMAKE_CURRENT_LIST_DIR}/umba_runtime_opt_check.cmake")
-
-#----------------------------------------------------------------------------
-
-
-
-#----------------------------------------------------------------------------
 set(UMBA_VCPKG_SYSARCH_PREFIX "${UMBA_TARGET_ARCH}-${UMBA_TARGET_SYSTEM}")
 # !!!
 message(STATUS "UMBA_VCPKG_SYSARCH_PREFIX: ${UMBA_VCPKG_SYSARCH_PREFIX}")
@@ -346,6 +343,12 @@ function(umba_vcpkg_find_target_triplet FOUND_TRIPLET FOUND_FULL_FILENAME )
 
     list(APPEND RUNTIME_SUFFIX_LIST "-") # Добавляем пустой элемент, чтобы список никогда не был пустым
 
+    if (UMBA_CMAKE_VERBOSE AND UMBA_CMAKE_TRACE AND UMBA_CMAKE_TRACE_VCPKG)
+        message(STATUS "UMBA: RUNTIME_SUFFIX_LIST:") # NOTICE
+        foreach(RT_SUFF_ITEM ${RUNTIME_SUFFIX_LIST})
+            message(STATUS "  ${RT_SUFF_ITEM}") # NOTICE
+        endforeach()
+    endif()
 
     #---------------------------
     # Формируем список кандидатов

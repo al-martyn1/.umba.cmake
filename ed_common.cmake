@@ -14,7 +14,7 @@ function(umba_early_detection_extract_canonical_target_arch_name OUTPUT_VAR INPU
     # ? arm64s armv7s armv7l
     if ("${INPUT_ARCH_STR}" MATCHES "arm64")
         set(${OUTPUT_VAR} "arm64" PARENT_SCOPE)
-    if ("${INPUT_ARCH_STR}" MATCHES "ARM64")
+    elseif ("${INPUT_ARCH_STR}" MATCHES "ARM64")
         set(${OUTPUT_VAR} "arm64" PARENT_SCOPE)
     elseif ("${INPUT_ARCH_STR}" MATCHES "aarch64")
         set(${OUTPUT_VAR} "arm64" PARENT_SCOPE)

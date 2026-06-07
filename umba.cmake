@@ -21,6 +21,32 @@ include("${CMAKE_CURRENT_LIST_DIR}/pathlib.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/mathlib.cmake")
 # include("${CMAKE_CURRENT_LIST_DIR}/umba_vcpkg.cmake")
 
+# https://stackoverflow.com/questions/10113017/setting-the-msvc-runtime-in-cmake
+# https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_LIBRARY.html
+# set_property(TARGET foo PROPERTY
+#  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+# https://cmake.org/cmake/help/git-stage/variable/CMAKE_MSVC_RUNTIME_LIBRARY.html
+# https://cmake.org/cmake/help/git-stage/manual/cmake-generator-expressions.7.html#manual:cmake-generator-expressions(7)
+# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+# MultiThreaded$<$<CONFIG:Debug>:Debug>DLL
+
+# linux
+# https://stackoverflow.com/questions/35994339/link-linux-c-application-statically-via-cmake-2-8
+
+#----------------------------------------------------------------------------
+include("${CMAKE_CURRENT_LIST_DIR}/umba_runtime_opt_check.cmake")
+
+#----------------------------------------------------------------------------
+
+# if(UMBA_STATIC_RUNTIME)
+#     # For use as ${UMBA_STATIC_RUNTIME} when calling umba_add_target_options
+#     set(UMBA_STATIC_RUNTIME "UMBA_STATIC_RUNTIME")
+#     set(STATIC_RUNTIME      "STATIC_RUNTIME")
+#     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+# else()
+#     message("Default Dynamic runtime used")
+# endif()
+
 
 #----------------------------------------------------------------------------
 
@@ -148,7 +174,7 @@ endif()
 if(DEFINED ENV{UMBA_TOOLS})
 
     if (UMBA_CMAKE_VERBOSE)
-            message(STATUS "Found environment variable 'UMBA_TOOLS': $ENV{UMBA_TOOLS}") # NOTICE
+            message(STATUS "UMBA: Found environment variable 'UMBA_TOOLS': $ENV{UMBA_TOOLS}") # NOTICE
     endif()
 
     find_program(UMBA_SUBST_MACROS_EXECUTABLE umba-subst-macros PATHS "$ENV{UMBA_TOOLS}/bin")
@@ -163,14 +189,14 @@ endif()
 if (UMBA_SUBST_MACROS_EXECUTABLE)
 
     if (UMBA_CMAKE_VERBOSE)
-        message(STATUS "Found umba-subst-macros tool: ${UMBA_SUBST_MACROS_EXECUTABLE}") # NOTICE
+        message(STATUS "UMBA: Found umba-subst-macros tool: ${UMBA_SUBST_MACROS_EXECUTABLE}") # NOTICE
     endif()
 
     # set(ENV{UMBA_SUBST_MACROS_EXECUTABLE} "${UMBA_SUBST_MACROS_EXECUTABLE}")
 
 else()
 
-    set(UMBA_SUBST_MACROS_EXECUTABLE "") # UMBA_SUBST_MACROS_EXECUTABLE может быть вида *_NOT_FOUND, это тоже FALSE
+    set(UMBA_SUBST_MACROS_EXECUTABLE FALSE) # UMBA_SUBST_MACROS_EXECUTABLE может быть вида *_NOT_FOUND, это тоже FALSE
 
 endif()
 
@@ -178,8 +204,10 @@ endif()
 if(DEFINED ENV{UMBA_SUBST_MACROS_EXECUTABLE})
 
     if (UMBA_CMAKE_VERBOSE)
-            message(STATUS "Found environment variable 'UMBA_SUBST_MACROS_EXECUTABLE': $ENV{UMBA_SUBST_MACROS_EXECUTABLE}") # NOTICE
+            message(STATUS "UMBA: Found environment variable 'UMBA_SUBST_MACROS_EXECUTABLE': $ENV{UMBA_SUBST_MACROS_EXECUTABLE}") # NOTICE
     endif()
+
+    set(UMBA_SUBST_MACROS_EXECUTABLE "$ENV{UMBA_SUBST_MACROS_EXECUTABLE}")
 
 endif()
 #----------------------------------------------------------------------------
@@ -240,9 +268,9 @@ endif()
 
 if (UMBA_CMAKE_VERBOSE)
     if (NOT UMBA_PROTOBUF_PROTOC)
-        message(NOTICE "Protobuf protoc compiler not found")
+        message(NOTICE "UMBA: Protobuf protoc compiler not found")
     else()
-        message(STATUS "Found Protobuf protoc compiler: ${UMBA_PROTOBUF_PROTOC}")
+        message(STATUS "UMBA: Found Protobuf protoc compiler: ${UMBA_PROTOBUF_PROTOC}")
     endif()
 endif()
 
@@ -274,9 +302,9 @@ if (UMBA_USE_GRPC)
     
     if (UMBA_CMAKE_VERBOSE)
         if (NOT GRPC_PROTOC_CPP_PLUGIN_EXECUTABLE)
-            message(NOTICE "GRPC Protobuf protoc compiler plugin not found")
+            message(NOTICE "UMBA: GRPC Protobuf protoc compiler plugin not found")
         else()
-            message(STATUS "GRPC Protobuf protoc compiler plugin : ${GRPC_PROTOC_CPP_PLUGIN_EXECUTABLE}")
+            message(STATUS "UMBA: GRPC Protobuf protoc compiler plugin: ${GRPC_PROTOC_CPP_PLUGIN_EXECUTABLE}")
         endif()
     endif()
 endif()
@@ -293,7 +321,7 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
     #if(MSVC)
     if (CMAKE_GENERATOR MATCHES "Visual Studio")
 
-        message(STATUS "Disable parallel jobs using '${CMAKE_GENERATOR}' generator for target '${TARGET}'")
+        message(STATUS "UMBA: Disable parallel jobs using '${CMAKE_GENERATOR}' generator for target '${TARGET}'")
 
         set_target_properties(${TARGET} PROPERTIES DISABLE_PARALLEL_BUILD TRUE)
 
@@ -322,7 +350,7 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
     file(GLOB PROTO_FILES_BY_MASK "${PROTO_FILES_MASK}")
 
     if (UMBA_CMAKE_VERBOSE AND UMBA_CMAKE_TRACE AND UMBA_CMAKE_TRACE_UMBA_ADD_TARGET_PROTOBUF_PROTO_FILES)
-        message(STATUS "=== Adding proto files to target: ${TARGET} ===")
+        message(STATUS "UMBA: === Adding proto files to target: ${TARGET} ===")
     endif()
 
     set(SRC_PATH_REPLACE_TO "${CMAKE_CURRENT_BINARY_DIR}/_umba_generated_from_proto/${TARGET}")
@@ -374,7 +402,11 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
                   OUTPUT ${OUTPUT_PB_SOURCE} ${OUTPUT_PB_HEADER} ${OUTPUT_GRPC_SOURCE} ${OUTPUT_GRPC_HEADER}
                   # COMMAND ${CMAKE_COMMAND} -E echo "Acquiring lock for ${PROTO_FILE}"
                   # COMMAND ${CMAKE_COMMAND} -E lock "${CMAKE_CURRENT_BINARY_DIR}/proto.lock"
-                  COMMAND ${UMBA_PROTOBUF_PROTOC}
+                  # COMMAND ${UMBA_PROTOBUF_PROTOC}
+                  # COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_PROTO_FILE_PATH}"
+                  COMMAND ${CMAKE_COMMAND} -E echo "Creating directory: ${OUTPUT_PROTO_FILE_PATH}"
+                  COMMAND cmd /c "if not exist \"${OUTPUT_PROTO_FILE_PATH}\" md \"${OUTPUT_PROTO_FILE_PATH}\""
+                  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
                   ARGS 
                     --grpc_out "${OUTPUT_PROTO_FILE_PATH}"
                     --cpp_out "${OUTPUT_PROTO_FILE_PATH}"
@@ -394,7 +426,7 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
                   # 
                   # COMMAND ${CMAKE_COMMAND} -E sleep 0.5
                   #
-                  COMMAND ${CMAKE_COMMAND} -E env "UMBA_SUBST_MACROS_EXECUTABLE=${UMBA_SUBST_MACROS_EXECUTABLE}" cmd /C ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/fix_cpp_keywords_for_files.cmd "${OUTPUT_PB_SOURCE}" "${OUTPUT_PB_HEADER}" "${OUTPUT_GRPC_SOURCE}" "${OUTPUT_GRPC_HEADER}"
+                  COMMAND ${CMAKE_COMMAND} -E env "UMBA_SUBST_MACROS_EXECUTABLE=${UMBA_SUBST_MACROS_EXECUTABLE}" cmd /C ${CMAKE_CURRENT_SOURCE_DIR}/.umba.cmake/fix_cpp_keywords_for_files.cmd "${OUTPUT_PB_SOURCE}" "${OUTPUT_PB_HEADER}" "${OUTPUT_GRPC_SOURCE}" "${OUTPUT_GRPC_HEADER}"
                   # COMMAND cmd /C ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/fix_cpp_keywords_for_files.cmd "${OUTPUT_PB_SOURCE}" "${OUTPUT_PB_HEADER}" "${OUTPUT_GRPC_SOURCE}" "${OUTPUT_GRPC_HEADER}"
                   #
                   # COMMAND ${CMAKE_COMMAND} -E echo "Releasing lock for ${PROTO_FILE}"
@@ -565,31 +597,6 @@ endif()
 
 
 
-# https://stackoverflow.com/questions/10113017/setting-the-msvc-runtime-in-cmake
-# https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_LIBRARY.html
-# set_property(TARGET foo PROPERTY
-#  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-# https://cmake.org/cmake/help/git-stage/variable/CMAKE_MSVC_RUNTIME_LIBRARY.html
-# https://cmake.org/cmake/help/git-stage/manual/cmake-generator-expressions.7.html#manual:cmake-generator-expressions(7)
-# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-# MultiThreaded$<$<CONFIG:Debug>:Debug>DLL
-
-# linux
-# https://stackoverflow.com/questions/35994339/link-linux-c-application-statically-via-cmake-2-8
-
-#----------------------------------------------------------------------------
-include("${CMAKE_CURRENT_LIST_DIR}/umba_runtime_opt_check.cmake")
-
-#----------------------------------------------------------------------------
-
-# if(UMBA_STATIC_RUNTIME)
-#     # For use as ${UMBA_STATIC_RUNTIME} when calling umba_add_target_options
-#     set(UMBA_STATIC_RUNTIME "UMBA_STATIC_RUNTIME")
-#     set(STATIC_RUNTIME      "STATIC_RUNTIME")
-#     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-# else()
-#     message("Default Dynamic runtime used")
-# endif()
 
 
 ### Boost
@@ -678,412 +685,4 @@ function(umba_make_sources_tree SRC_ROOT SRCS HDRS RCSRCS)
 endfunction()
 
 
-
-
-### Target options
-
-# UNICODE/MBCS/DBCS
-# https://learn.microsoft.com/ru-ru/cpp/text/support-for-multibyte-character-sets-mbcss?view=msvc-170
-# https://learn.microsoft.com/ru-ru/cpp/text/mbcs-support-in-visual-cpp?view=msvc-170
-# https://learn.microsoft.com/ru-ru/cpp/text/mbcs-programming-tips?view=msvc-170
-
-# "UNICODE" "CONSOLE" "WINDOWS" "BIGOBJ" "UTF8"
-# "SRCUTF8"/"UTF8SRC"/"SRC_UTF8"/"UTF8_SRC"
-# "STATIC_RUNTIME"
-function(umba_add_target_options TARGET)
-
-    # https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html
-
-    # https://jeremimucha.com/2021/02/cmake-functions-and-macros/
-
-    #math(EXPR indices "${ARGC} - 1")
-    #foreach(_index RANGE ${indices})
-
-    math(EXPR maxArgN "${ARGC} - 1")
-    foreach(_index RANGE 1 ${maxArgN} 1)
-
-        set(CURARG ${ARGV${_index}})
-
-        if(NOT CURARG)
-            message("umba_add_target_options: NULL Argument at pos: ${_index} (${CURARG}) (1)")
-            continue()
-        endif()
-
-        if(${CURARG} STREQUAL "")
-            message("umba_add_target_options: NULL Argument at pos: ${_index} (${CURARG}) (2)")
-            continue()
-        endif()
-
-        if(${CURARG} STREQUAL "UNICODE")
-
-            # Common for all
-            target_compile_definitions(${TARGET} PRIVATE "UNICODE" "_UNICODE")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                message(NOTICE "Add UNICODE options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                target_compile_options(${TARGET} PRIVATE "-municode")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                message(NOTICE "Add UNICODE options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                #message(NOTICE "Add UNICODE options for MSVC")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "SRCUTF8" OR ${CURARG} STREQUAL "UTF8SRC" OR ${CURARG} STREQUAL "UTF8_SRC" OR ${CURARG} STREQUAL "SRC_UTF8")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                message(NOTICE "Add SRCUTF8 options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                # !!! conversion from UTF-8 to UTF-8 -finput-charset=UTF-8 not supported by iconv
-                # target_compile_options(${TARGET} PRIVATE "-finput-charset=UTF-8")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                message(NOTICE "Add SRCUTF8 options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                # /utf-8, that sets both /source-charset:utf-8 and /execution-charset:utf-8.
-                target_compile_options(${TARGET} PRIVATE "/source-charset:utf-8")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "UTF8")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                message(NOTICE "Add UTF8 options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                # !!! conversion from UTF-8 to UTF-8 -finput-charset=UTF-8 not supported by iconv
-                # target_compile_options(${TARGET} PRIVATE "-fexec-charset=UTF-8 -finput-charset=UTF-8")  # https://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                message(NOTICE "Add UTF8 options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                target_compile_options(${TARGET} PRIVATE "/utf-8")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "CONSOLE")
-            if(WIN32)
-
-                # Common for all
-                target_compile_definitions(${TARGET} PRIVATE "CONSOLE" "_CONSOLE")
-
-                if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                    message(NOTICE "Add CONSOLE options for Clang")
-
-                elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                    target_compile_options(${TARGET} PRIVATE "-mconsole")
-                    target_link_options(${TARGET} PRIVATE "-Wl,--subsystem,console")
-
-                elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                    message(NOTICE "Add CONSOLE options for Intel")
-
-                elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                    target_link_options(${TARGET} PRIVATE "/SUBSYSTEM:CONSOLE")
-
-                endif()
-            endif()
-
-        elseif(${CURARG} STREQUAL "WINDOWS")
-            if(WIN32)
-
-                # Common for all
-                target_compile_definitions(${TARGET} PRIVATE "WINDOWS" "_WINDOWS")
-
-                if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                    message(NOTICE "Add WINDOWS options for Clang")
-
-                elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                    target_compile_options(${TARGET} PRIVATE "-mwindows")
-                    target_link_options(${TARGET} PRIVATE "-Wl,--subsystem,windows")
-
-                elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                    message(NOTICE "Add WINDOWS options for Intel")
-
-                elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                    target_link_options(${TARGET} PRIVATE "/SUBSYSTEM:WINDOWS")
-
-                endif()
-            endif()
-
-        elseif(${CURARG} STREQUAL "BIGOBJ")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                message(NOTICE "Add BIGOBJ options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                target_compile_options(${TARGET} PRIVATE "-Wa,-mbig-obj" "-Wl,--large-address-aware")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                message(NOTICE "Add BIGOBJ options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                target_compile_options(${TARGET} PRIVATE "/bigobj")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "G0")
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-                target_compile_options(${TARGET} PRIVATE "-g0")
-            endif()
-
-        elseif(${CURARG} STREQUAL "G1")
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-                target_compile_options(${TARGET} PRIVATE "-g1")
-            endif()
-
-        elseif(${CURARG} STREQUAL "G3")
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-                target_compile_options(${TARGET} PRIVATE "-g3")
-            endif()
-
-        elseif(${CURARG} STREQUAL "WALL")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                #message(NOTICE "Add WALL options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-                target_compile_options(${TARGET} PRIVATE "-Wall" "-Wextra" "-Wimplicit-fallthrough" "-Wreturn-type")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                #message(NOTICE "Add WALL options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                # https://devblogs.microsoft.com/cppblog/broken-warnings-theory/
-                # https://habr.com/ru/companies/pvs-studio/articles/347686/
-                # https://learn.microsoft.com/en-us/cpp/build/reference/compiler-option-warning-level?view=msvc-170
-                target_compile_options(${TARGET} PRIVATE "/Wall" "/external:anglebrackets" "/external:W1")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "PEDANTIC") # includes "WALL" options too
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                #message(NOTICE "Add PEDANTIC options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-                target_compile_options(${TARGET} PRIVATE "-Wpedantic" "-pedantic" "-Werror=pedantic" "-pedantic-errors" "-Wall" "-Wextra" "-Wreturn-type")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                #message(NOTICE "Add PEDANTIC options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                # https://devblogs.microsoft.com/cppblog/broken-warnings-theory/
-                # https://habr.com/ru/companies/pvs-studio/articles/347686/
-                # https://learn.microsoft.com/en-us/cpp/build/reference/compiler-option-warning-level?view=msvc-170
-                # https://learn.microsoft.com/en-us/cpp/build/reference/za-ze-disable-language-extensions?view=msvc-160
-                # https://learn.microsoft.com/en-us/cpp/build/reference/zc-conformance?view=msvc-170
-                # https://stackoverflow.com/questions/69575307/microsoft-c-c-what-is-the-definition-of-strict-conformance-w-r-t-implement
-                target_compile_options(${TARGET} PRIVATE "/Wall" "/permissive-" "/external:anglebrackets" "/external:W0")
-                # Вопрос - внешние варнинги будут как ошибки при /WX?
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "PERMISSIVE")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                #message(NOTICE "Add PERMISSIVE options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-                target_compile_options(${TARGET} PRIVATE "-fpermissive" )
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                #message(NOTICE "Add PERMISSIVE options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                # https://devblogs.microsoft.com/cppblog/broken-warnings-theory/
-                # https://habr.com/ru/companies/pvs-studio/articles/347686/
-                # https://learn.microsoft.com/en-us/cpp/build/reference/compiler-option-warning-level?view=msvc-170
-                target_compile_options(${TARGET} PRIVATE "/W2" "/permissive" "/external:anglebrackets" "/external:W0")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "NOWARNPACKALIGN")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                #message(NOTICE "Add NOWARNPACKALIGN options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                #message(NOTICE "Add NOWARNPACKALIGN options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                #message(NOTICE "Add NOWARNPACKALIGN options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                target_compile_options(${TARGET} PRIVATE "/wd4315")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "WERR" OR ${CURARG} STREQUAL "WERROR")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                #message(NOTICE "Add WERR options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-
-                target_compile_options(${TARGET} PRIVATE "-Werror" -Werror=return-type)
-
-                # typedef locally defined but not used
-                target_compile_options(${TARGET} PRIVATE "-Wno-unused-local-typedefs")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                #message(NOTICE "Add WERR options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                # https://learn.microsoft.com/ru-ru/cpp/build/reference/permissive-standards-conformance?view=msvc-170
-                # https://learn.microsoft.com/en-us/cpp/build/reference/permissive-standards-conformance?view=msvc-170
-                # https://learn.microsoft.com/en-us/cpp/build/reference/compiler-option-warning-level?view=msvc-170
-
-                target_compile_options(${TARGET} PRIVATE "/WX" "/external:anglebrackets" "/external:W0")
-
-                # !!! Надо разобратся со всеми этими варнингами. Пока дизаблим
-
-                # warning C4435: 'TYPE': Object layout under /vd2 will change due to virtual base 'TYPE_BASE'
-                target_compile_options(${TARGET} PRIVATE "/wd4435")
-
-                # warning C4464: exclude warning "relative include path contains '..'"
-                target_compile_options(${TARGET} PRIVATE "/wd4464")
-
-                # warning C4505: unreferenced function has been removed
-                target_compile_options(${TARGET} PRIVATE "/wd4514")
-
-                # warning C4514: unreferenced inline function has been removed
-                target_compile_options(${TARGET} PRIVATE "/wd4514")
-
-                # warning C4626: 'TYPE': assignment operator was implicitly defined as deleted
-                target_compile_options(${TARGET} PRIVATE "/wd4626")
-
-                # https://learn.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4710?view=msvc-170
-                # warning C4710: function not inlined
-                target_compile_options(${TARGET} PRIVATE "/wd4710")
-
-                # warning C4711: function selected for automatic inline expansion
-                target_compile_options(${TARGET} PRIVATE "/wd4711")
-
-                # warning C4738: storing 32-bit float result in memory, possible loss of performance
-                target_compile_options(${TARGET} PRIVATE "/wd4738")
-
-                # warning C4810: value of pragma pack(show)
-                # target_compile_options(${TARGET} PRIVATE "/wd4810")
-                
-                # warning C4820: N bytes padding added after data member 'memberName'
-                target_compile_options(${TARGET} PRIVATE "/wd4820")
-
-                # warning C4866: compiler may not enforce left-to-right evaluation order for call to 'umba::SimpleFormatter::operator<<<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >'
-                target_compile_options(${TARGET} PRIVATE "/wd4866")
-
-                # warning C5027: 'TYPE': move assignment operator was implicitly defined as deleted
-                target_compile_options(${TARGET} PRIVATE "/wd5027")
-
-                # warning C5045: Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
-                target_compile_options(${TARGET} PRIVATE "/wd5045")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "ALLOW_UNUSED")
-
-            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
-                message(NOTICE "Add ALLOW_UNUSED options for Clang")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
-                target_compile_options(${TARGET} PRIVATE "-Wno-unused-parameter")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-                message(NOTICE "Add ALLOW_UNUSED options for Intel")
-
-            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-                target_compile_options(${TARGET} PRIVATE "/wd4100")
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "STATIC_RUNTIME" OR ${CURARG} STREQUAL "UMBA_STATIC_RUNTIME")
-            if(WIN32)
-
-                # Под винду разве не все компиляторы используют MSVC ABI?
-                set_property(TARGET ${TARGET} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
-                #if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-                #    message(NOTICE "Add STATIC_RUNTIME options for Clang")
-                #elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-                #    target_compile_options(${TARGET} PRIVATE "-Wa,-mbig-obj")
-                #elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-                #    message(NOTICE "Add STATIC_RUNTIME options for Intel")
-                #elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-                #    set_property(TARGET ${TARGET} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-                #endif()
-
-            endif()
-
-        elseif(${CURARG} STREQUAL "PLIBS" OR ${CURARG} STREQUAL "PLATFORM_LIBS") # basic platform libs
-            if(WIN32) # target is Win32, not host (CMAKE_HOST_WIN32)
-                      # https://cmake.org/cmake/help/book/mastering-cmake/chapter/Cross%20Compiling%20With%20CMake.html
-
-                target_link_libraries(${TARGET} PRIVATE user32 gdi32 kernel32 ws2_32 advapi32 dbghelp iphlpapi shell32)
-
-            endif()
-
-        endif() # if(${CURARG}
-
-    endforeach()
-
-endfunction()
-
-
+include("${CMAKE_CURRENT_LIST_DIR}/umba_add_target_options.cmake")
