@@ -19,6 +19,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/functions_base.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/strlib.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/pathlib.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/mathlib.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/check_Z_VCPKG_POWERSHELL_PATH.cmake")
 # include("${CMAKE_CURRENT_LIST_DIR}/umba_vcpkg.cmake")
 
 # https://stackoverflow.com/questions/10113017/setting-the-msvc-runtime-in-cmake
@@ -33,7 +34,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/mathlib.cmake")
 # linux
 # https://stackoverflow.com/questions/35994339/link-linux-c-application-statically-via-cmake-2-8
 
-#----------------------------------------------------------------------------
+#----------------------------------------------------------------------------P
 include("${CMAKE_CURRENT_LIST_DIR}/umba_runtime_opt_check.cmake")
 
 #----------------------------------------------------------------------------

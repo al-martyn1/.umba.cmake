@@ -74,10 +74,11 @@ if(DEFINED ENV{VCPKG_ROOT})
     set(UMBA_VCPKG_CMAKE "${UMBA_VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
     if(EXISTS "${UMBA_VCPKG_CMAKE}")
-        set(UMBA_VCPKG_FOUND ON)
+    else()
+        set(UMBA_VCPKG_CMAKE FALSE)
     endif()
   
-    if (UMBA_VCPKG_FOUND AND UMBA_CMAKE_VERBOSE)
+    if (UMBA_VCPKG_CMAKE AND UMBA_CMAKE_VERBOSE)
         message(STATUS "UMBA: Found VCPKG: ${UMBA_VCPKG_ROOT}") # NOTICE
         message(STATUS "UMBA: vcpkg.cmake: ${UMBA_VCPKG_CMAKE}") # NOTICE
     endif()
@@ -136,7 +137,7 @@ function(umba_vcpkg_get_all_triplet_paths OUTPUT_VAR )
     #     endforeach()
     # endif()
 
-    if (UMBA_VCPKG_FOUND)
+    if (UMBA_VCPKG_CMAKE)
 
         list(APPEND umbaRes "${UMBA_VCPKG_ROOT}/triplets")
         list(APPEND umbaRes "${UMBA_VCPKG_ROOT}/triplets/community")
@@ -452,7 +453,9 @@ endif()
 
 
 #----------------------------------------------------------------------------
-if (UMBA_VCPKG_FOUND)
+include("${CMAKE_CURRENT_LIST_DIR}/check_Z_VCPKG_POWERSHELL_PATH.cmake")
+
+if (UMBA_VCPKG_CMAKE)
 
     # Запихиваем все пути к тирплетам в VCPKG переменную обратно
     set(VCPKG_OVERLAY_TRIPLETS ${UMBA_VCPKG_TRIPLETS_PATH_LIST}) 
@@ -464,7 +467,12 @@ if (UMBA_VCPKG_FOUND)
 
     include("${UMBA_VCPKG_CMAKE}")
 
+else()
+
+    message(FATAL_ERROR "UMBA: vcpkg.cmake not found, set VCPKG_ROOT environment variable")
+
 endif()
+
 
 #----------------------------------------------------------------------------
 
