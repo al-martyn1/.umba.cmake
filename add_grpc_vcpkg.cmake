@@ -1,6 +1,6 @@
 # author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
 # copyright (c) 2024-2026 Alexander Martynov
-# brief Математические функции
+# brief Подключение библиотеки gRPC
 # ----------------------------------------------------------------
 
 include_guard(GLOBAL)

@@ -467,11 +467,21 @@ if (UMBA_VCPKG_CMAKE)
 
     include("${UMBA_VCPKG_CMAKE}")
 
+
+    if (VCPKG_MANIFEST_MODE)
+        set(UMBA_VCPKG_INSTALLED_LIBS_ROOT "${CMAKE_BINARY_DIR}/vcpkg_installed")
+    else()
+        set(UMBA_VCPKG_INSTALLED_LIBS_ROOT "${UMBA_VCPKG_ROOT}/installed")
+    endif()
+
+    set(UMBA_VCPKG_TARGET_TRIPLET_TOOLS_BINARY_ROOT "${UMBA_VCPKG_INSTALLED_LIBS_ROOT}/${VCPKG_TARGET_TRIPLET}")
+
 else()
 
     message(FATAL_ERROR "UMBA: vcpkg.cmake not found, set VCPKG_ROOT environment variable")
 
 endif()
+
 
 
 #----------------------------------------------------------------------------

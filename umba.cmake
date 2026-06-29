@@ -233,46 +233,57 @@ if (UMBA_USE_GRPC AND UMBA_USE_GRPC_SUBMODULE)
     set(UMBA_PROTOBUF_EXTERN_PROTOC OFF)
 endif()
 
-if (UMBA_PROTOBUF_EXTERN_PROTOC OR UMBA_PROTOBUF_PROTOC_VER_MAJOR)
+if (NOT UMBA_PROTOBUF_PROTOC)
 
-    # Если не установлены UMBA_PROTOBUF_PROTOC_VER_MAJOR и UMBA_PROTOBUF_PROTOC_VER_MINOR
-    # пытаемся найти через системную переменную без номера версии
-    # !!! Доделать
+    message(STATUS "UMBA: UMBA_PROTOBUF_PROTOC not set, try to set to generic protoc")
 
-    if (NOT UMBA_PROTOBUF_PROTOC_VER_MAJOR)
-        set(UMBA_PROTOBUF_PROTOC_VER_MAJOR 31)
-        if (UMBA_CMAKE_VERBOSE)
-            message(STATUS "Set Protobuf protoc ver major (UMBA_PROTOBUF_PROTOC_VER_MAJOR) to: ${UMBA_PROTOBUF_PROTOC_VER_MAJOR}")
-        endif()
-    endif()
+    if (UMBA_PROTOBUF_EXTERN_PROTOC OR UMBA_PROTOBUF_PROTOC_VER_MAJOR)
     
-    if (NOT UMBA_PROTOBUF_PROTOC_VER_MINOR)
-        set(UMBA_PROTOBUF_PROTOC_VER_MINOR 1)
-        if (UMBA_CMAKE_VERBOSE)
-            message(STATUS "Set Protobuf protoc ver major (UMBA_PROTOBUF_PROTOC_VER_MINOR) to: ${UMBA_PROTOBUF_PROTOC_VER_MINOR}")
+        # Если не установлены UMBA_PROTOBUF_PROTOC_VER_MAJOR и UMBA_PROTOBUF_PROTOC_VER_MINOR
+        # пытаемся найти через системную переменную без номера версии
+        # !!! Доделать
+    
+        if (NOT UMBA_PROTOBUF_PROTOC_VER_MAJOR)
+            set(UMBA_PROTOBUF_PROTOC_VER_MAJOR 31)
+            if (UMBA_CMAKE_VERBOSE)
+                message(STATUS "Set Protobuf protoc ver major (UMBA_PROTOBUF_PROTOC_VER_MAJOR) to: ${UMBA_PROTOBUF_PROTOC_VER_MAJOR}")
+            endif()
         endif()
+        
+        if (NOT UMBA_PROTOBUF_PROTOC_VER_MINOR)
+            set(UMBA_PROTOBUF_PROTOC_VER_MINOR 1)
+            if (UMBA_CMAKE_VERBOSE)
+                message(STATUS "Set Protobuf protoc ver major (UMBA_PROTOBUF_PROTOC_VER_MINOR) to: ${UMBA_PROTOBUF_PROTOC_VER_MINOR}")
+            endif()
+        endif()
+    
+        # Проверить системные переменные на базе UMBA_PROTOBUF_PROTOC_VER_MAJOR UMBA_PROTOBUF_PROTOC_VER_MINOR - PROTOC_M_N_BIN и PROTOC_M_N
+        # !!! Доделать
+    
+        # https://cmake.org/cmake/help/latest/command/find_program.html
+        find_program(UMBA_PROTOBUF_PROTOC protoc PATHS "$ENV{PROTOC_BIN}" "$ENV{PROTOC_HOME}/bin")
+        # https://cmake.org/cmake/help/latest/command/message.html
+    
+    else()
+    
+        set(UMBA_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
+    
     endif()
-
-    # Проверить системные переменные на базе UMBA_PROTOBUF_PROTOC_VER_MAJOR UMBA_PROTOBUF_PROTOC_VER_MINOR - PROTOC_M_N_BIN и PROTOC_M_N
-    # !!! Доделать
-
-    # https://cmake.org/cmake/help/latest/command/find_program.html
-    find_program(UMBA_PROTOBUF_PROTOC protoc PATHS "$ENV{PROTOC_BIN}" "$ENV{PROTOC_HOME}/bin")
-    # https://cmake.org/cmake/help/latest/command/message.html
-
-else()
-
-    set(UMBA_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
 
 endif()
 
+# find_program(UMBA_PROTOBUF_PROTOC protoc PATHS "$ENV{PROTOC_BIN}" "$ENV{PROTOC_HOME}/bin")
 
 if (UMBA_CMAKE_VERBOSE)
+
     if (NOT UMBA_PROTOBUF_PROTOC)
         message(NOTICE "UMBA: Protobuf protoc compiler not found")
     else()
         message(STATUS "UMBA: Found Protobuf protoc compiler: ${UMBA_PROTOBUF_PROTOC}")
     endif()
+
+    message(STATUS "UMBA: Protobuf_PROTOC_EXECUTABLE: ${Protobuf_PROTOC_EXECUTABLE}")
+
 endif()
 
 
@@ -407,7 +418,7 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
                   # COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_PROTO_FILE_PATH}"
                   COMMAND ${CMAKE_COMMAND} -E echo "Creating directory: ${OUTPUT_PROTO_FILE_PATH}"
                   COMMAND cmd /c "if not exist \"${OUTPUT_PROTO_FILE_PATH}\" md \"${OUTPUT_PROTO_FILE_PATH}\""
-                  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
+                  COMMAND "${UMBA_PROTOBUF_PROTOC}"
                   ARGS 
                     --grpc_out "${OUTPUT_PROTO_FILE_PATH}"
                     --cpp_out "${OUTPUT_PROTO_FILE_PATH}"
@@ -439,12 +450,12 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
 
             add_custom_command(
                   OUTPUT ${OUTPUT_PB_SOURCE} ${OUTPUT_PB_HEADER} ${OUTPUT_GRPC_SOURCE} ${OUTPUT_GRPC_HEADER}
-                  COMMAND ${_PROTOBUF_PROTOC}
+                  COMMAND "${UMBA_PROTOBUF_PROTOC}"
                   ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
                     --proto_path ${CMAKE_BINARY_DIR}/_deps/grpc-src/third_party/protobuf/src
                     --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
                     -I "${tink_proto_path}"
-                    --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+                    --plugin=protoc-gen-grpc="${GRPC_PROTOC_CPP_PLUGIN_EXECUTABLE}"
                     "${PROTO_FILE}"
                   COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/fix_cpp_keywords.sh ${OUTPUT_PB_SOURCE}
                   COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/fix_cpp_keywords.sh ${OUTPUT_PB_HEADER}
