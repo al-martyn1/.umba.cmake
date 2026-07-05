@@ -233,6 +233,8 @@ if (UMBA_USE_GRPC AND UMBA_USE_GRPC_SUBMODULE)
     set(UMBA_PROTOBUF_EXTERN_PROTOC OFF)
 endif()
 
+
+#[[
 if (NOT UMBA_PROTOBUF_PROTOC)
 
     message(STATUS "UMBA: UMBA_PROTOBUF_PROTOC not set, try to set to generic protoc")
@@ -271,9 +273,11 @@ if (NOT UMBA_PROTOBUF_PROTOC)
     endif()
 
 endif()
+]]
 
 # find_program(UMBA_PROTOBUF_PROTOC protoc PATHS "$ENV{PROTOC_BIN}" "$ENV{PROTOC_HOME}/bin")
 
+#[[
 if (UMBA_CMAKE_VERBOSE)
 
     if (NOT UMBA_PROTOBUF_PROTOC)
@@ -285,7 +289,7 @@ if (UMBA_CMAKE_VERBOSE)
     message(STATUS "UMBA: Protobuf_PROTOC_EXECUTABLE: ${Protobuf_PROTOC_EXECUTABLE}")
 
 endif()
-
+]]
 
 #----------------------------------------------------------------------------
 # https://cmake.org/cmake/help/latest/variable/CMAKE_CROSSCOMPILING.html
@@ -452,7 +456,7 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
                   OUTPUT ${OUTPUT_PB_SOURCE} ${OUTPUT_PB_HEADER} ${OUTPUT_GRPC_SOURCE} ${OUTPUT_GRPC_HEADER}
                   COMMAND "${UMBA_PROTOBUF_PROTOC}"
                   ARGS --grpc_out "${CMAKE_CURRENT_BINARY_DIR}"
-                    --proto_path ${CMAKE_BINARY_DIR}/_deps/grpc-src/third_party/protobuf/src
+#                    --proto_path ${CMAKE_BINARY_DIR}/_deps/grpc-src/third_party/protobuf/src
                     --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
                     -I "${tink_proto_path}"
                     --plugin=protoc-gen-grpc="${GRPC_PROTOC_CPP_PLUGIN_EXECUTABLE}"

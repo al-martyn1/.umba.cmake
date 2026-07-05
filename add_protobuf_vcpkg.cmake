@@ -17,10 +17,14 @@ else()
 endif()
 
 
+# G:\vcpkg\installed\x64-mingw-static\tools\protobuf\protoc.exe
 find_program(UMBA_PROTOBUF_PROTOC protoc PATHS "${UMBA_VCPKG_TARGET_TRIPLET_TOOLS_BINARY_ROOT}/protobuf" "$ENV{PROTOC_BIN}" "$ENV{PROTOC_HOME}/bin")
+
 if (NOT UMBA_PROTOBUF_PROTOC)
     message(WARNING "UMBA: protobuf: protoc not found in ${UMBA_VCPKG_TARGET_TRIPLET_TOOLS_BINARY_ROOT}/protobuf")
     set(UMBA_PROTOBUF_PROTOC Protobuf_PROTOC_EXECUTABLE)
+else()
+    message(STATUS "UMBA: UMBA_PROTOBUF_PROTOC: ${UMBA_PROTOBUF_PROTOC}")
 endif()
 
 
