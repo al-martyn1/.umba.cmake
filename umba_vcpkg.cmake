@@ -276,7 +276,9 @@ To try and link everything possible statically
 
 
 #----------------------------------------------------------------------------
-set(UMBA_VCPKG_SYSARCH_PREFIX "${UMBA_TARGET_ARCH}-${UMBA_TARGET_SYSTEM}")
+set(UMBA_VCPKG_TARGET_SYSARCH_PREFIX "${UMBA_TARGET_ARCH}-${UMBA_TARGET_SYSTEM}")
+set(UMBA_VCPKG_SYSARCH_PREFIX "${UMBA_VCPKG_TARGET_SYSARCH_PREFIX}") # compatibility
+set(UMBA_VCPKG_HOST_SYSARCH_PREFIX "${UMBA_HOST_ARCH}-${UMBA_HOST_SYSTEM}")
 # !!!
 message(STATUS "UMBA_VCPKG_SYSARCH_PREFIX: ${UMBA_VCPKG_SYSARCH_PREFIX}")
 
@@ -469,6 +471,7 @@ if (UMBA_VCPKG_CMAKE)
 
 
     if (VCPKG_MANIFEST_MODE)
+        # https://chat.deepseek.com/share/qyjg0o6c9m3f45zje0
         set(UMBA_VCPKG_INSTALLED_LIBS_ROOT "${CMAKE_BINARY_DIR}/vcpkg_installed")
     else()
         set(UMBA_VCPKG_INSTALLED_LIBS_ROOT "${UMBA_VCPKG_ROOT}/installed")

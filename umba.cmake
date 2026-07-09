@@ -301,7 +301,7 @@ endif()
 
 # See https://github.com/samoilovv/TinkoffInvestSDK/blob/main/cmake/common.cmake
 
-
+#[[
 if (UMBA_USE_GRPC)
     if (UMBA_USE_GRPC_SUBMODULE)
         if(CMAKE_CROSSCOMPILING)
@@ -324,7 +324,7 @@ if (UMBA_USE_GRPC)
         endif()
     endif()
 endif()
-
+]]
 
 #----------------------------------------------------------------------------
 function(umba_add_target_protobuf_grpc_proto_files_ex
@@ -428,7 +428,7 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
                     --cpp_out "${OUTPUT_PROTO_FILE_PATH}"
                     "-I${PROTO_FILE_PATH}"
                     ${PROTOC_OPTS}
-                    --plugin=protoc-gen-grpc="${GRPC_PROTOC_CPP_PLUGIN_EXECUTABLE}"
+                    --plugin=protoc-gen-grpc="${UMBA_GRPC_CPP_PLUGIN}"
                     "${PROTO_FILE}"
                   # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/fix_cpp_keywords.cmd "${OUTPUT_PB_SOURCE}"    # cmd /C 
                   # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/fix_cpp_keywords.cmd "${OUTPUT_PB_HEADER}"    # cmd /C 
@@ -459,7 +459,7 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
 #                    --proto_path ${CMAKE_BINARY_DIR}/_deps/grpc-src/third_party/protobuf/src
                     --cpp_out "${CMAKE_CURRENT_BINARY_DIR}"
                     -I "${tink_proto_path}"
-                    --plugin=protoc-gen-grpc="${GRPC_PROTOC_CPP_PLUGIN_EXECUTABLE}"
+                    --plugin=protoc-gen-grpc="${UMBA_GRPC_CPP_PLUGIN}"
                     "${PROTO_FILE}"
                   COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/fix_cpp_keywords.sh ${OUTPUT_PB_SOURCE}
                   COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/fix_cpp_keywords.sh ${OUTPUT_PB_HEADER}
