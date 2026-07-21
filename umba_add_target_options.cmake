@@ -267,7 +267,7 @@ function(umba_add_target_options TARGET)
             elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
                 # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
-                target_compile_options(${TARGET} PRIVATE "-fpermissive" )
+                target_compile_options(${TARGET} PRIVATE "-fpermissive")
 
             elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 
@@ -300,6 +300,31 @@ function(umba_add_target_options TARGET)
             elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
                 target_compile_options(${TARGET} PRIVATE "/wd4315")
+
+            endif()
+
+        
+        elseif(${CURARG} STREQUAL "WNOERR" OR ${CURARG} STREQUAL "WNOERROR" OR ${CURARG} STREQUAL "WERR-"  OR ${CURARG} STREQUAL "WERROR-")
+
+            if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+
+                #message(NOTICE "Add WERR- options for Clang")
+
+            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+
+                # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+                target_compile_options(${TARGET} PRIVATE "-Wno-error")
+
+            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+
+                #message(NOTICE "Add WALL options for Intel")
+
+            elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+
+                # https://devblogs.microsoft.com/cppblog/broken-warnings-theory/
+                # https://habr.com/ru/companies/pvs-studio/articles/347686/
+                # https://learn.microsoft.com/en-us/cpp/build/reference/compiler-option-warning-level?view=msvc-170
+                target_compile_options(${TARGET} PRIVATE "/WX-")
 
             endif()
 
