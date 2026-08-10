@@ -337,15 +337,15 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
     #if(MSVC)
     if (CMAKE_GENERATOR MATCHES "Visual Studio")
 
-        message(STATUS "UMBA: Disable parallel jobs using '${CMAKE_GENERATOR}' generator for target '${TARGET}'")
-
-        set_target_properties(${TARGET} PROPERTIES DISABLE_PARALLEL_BUILD TRUE)
-
-        set_target_properties(${TARGET} PROPERTIES
-            VS_GLOBAL_MaxCpuCount 1
-            VS_GLOBAL_EnableParallelBuild false
-            VS_GLOBAL_Parallel 0
-            )
+        # message(STATUS "UMBA: Disable parallel jobs using '${CMAKE_GENERATOR}' generator for target '${TARGET}'")
+        # 
+        # set_target_properties(${TARGET} PROPERTIES DISABLE_PARALLEL_BUILD TRUE)
+        # 
+        # set_target_properties(${TARGET} PROPERTIES
+        #     VS_GLOBAL_MaxCpuCount 1
+        #     VS_GLOBAL_EnableParallelBuild false
+        #     VS_GLOBAL_Parallel 0
+        #     )
 
         # # Добавляем кастомные свойства MSBuild для цели
         # set_target_properties(${TARGET} PROPERTIES
@@ -354,12 +354,12 @@ function(umba_add_target_protobuf_grpc_proto_files_ex
         #     VS_GLOBAL_<Lib>UseMultiToolTask false
         # )
         
-        # Альтернативно, через макросы:
-        set_target_properties(${TARGET} PROPERTIES
-            VS_GLOBAL_ClCompileUseMultiToolTask false
-            VS_GLOBAL_LinkUseMultiToolTask false
-            VS_GLOBAL_LibUseMultiToolTask false
-        )
+        # # Альтернативно, через макросы:
+        # set_target_properties(${TARGET} PROPERTIES
+        #     VS_GLOBAL_ClCompileUseMultiToolTask false
+        #     VS_GLOBAL_LinkUseMultiToolTask false
+        #     VS_GLOBAL_LibUseMultiToolTask false
+        # )
 
     endif()
 
